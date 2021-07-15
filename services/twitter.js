@@ -46,7 +46,15 @@ const analyzeTweets = async (input) => {
 			const filteredData = sentimentResult.map((s) => ({
 				id: s.id,
 				text: input[s.id],
-				sentiment: s.sentiment,
+				sentiment: s.sentiment !== 'mixed'
+					? s.sentiment
+					: (() => {
+						const scores = s.confidenceScores
+						const scoreValues = Object.values(scores)
+						const topScoreIndex = scoreValues.indexOf(Math.max.apply(null, scoreValues))
+						const sentiment = Object.keys(scores)[topScoreIndex]
+						return sentiment
+					})(),
 				scores: s.confidenceScores
 			}))
 			return filteredData
