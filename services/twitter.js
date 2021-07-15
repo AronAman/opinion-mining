@@ -34,7 +34,7 @@ const analyzeTweets = async (input) => {
 	if (!input.length) {
 		return {
 			error: {
-				message: "An error occured. Please try again later."
+				message: 'An error occured. Please try again later.'
 			}
 		}
 	}
@@ -51,9 +51,9 @@ const analyzeTweets = async (input) => {
 			}))
 			return filteredData
 		} else {
-			console.error("Encountered an error:", result.error);
+			console.error('Encountered an error:', sentimentResult.error)
 			return {
-				error: result.error
+				error: sentimentResult.error
 			}
 		}
 	} catch (error) {
