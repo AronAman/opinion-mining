@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { searchTweets } = require('../services/twitter')
+const { searchTweets, analyzeTweets } = require('../services/twitter')
 
 router.get('/', async (req, res) => {
 	const query = req.query.q
@@ -13,9 +13,12 @@ router.get('/', async (req, res) => {
 		return res.status(403).json(tweets.error)
 	}
 
-	const tweetsText = tweets.data.map(t => t.full_text)
+	const tweetsText = tweets.data.map(t => t.text)
+	// console.log(tweetsText)
 
-	res.send(tweetsText)
+	const sentimentResult = await analyzeTweets(tweetsText)
+
+	res.send(sentimentResult)
 })
 
 module.exports = router

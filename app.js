@@ -9,8 +9,6 @@ const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
 const twitterRouter = require('./routes/twitter')
 
-console.log(process.env.TWITTER_API_KEY)
-
 const app = express()
 
 app.use(cors())

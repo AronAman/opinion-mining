@@ -1,22 +1,22 @@
 const Twitter = require('twitter')
-
-const client = new Twitter({
-	consumer_key: process.env.TWITTER_CONSUMER_KEY,
-	access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-	bearer_token: process.env.TWITTER_BEARER_TOKEN
-})
+const { TextAnalyticsClient, AzureKeyCredential } = require('@azure/ai-text-analytics')
 
 const searchTweets = async (query) => {
+	const twitterClient = new Twitter({
+		consumer_key: process.env.TWITTER_CONSUMER_KEY,
+		access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+		bearer_token: process.env.TWITTER_BEARER_TOKEN
+	})
 
 	try {
-		const tweets = await client.get('search/tweets', { q: query, count: 10, tweet_mode: 'extended', result_type: 'popular', lang: 'en' })
+		const tweets = await twitterClient.get('search/tweets', { q: query, count: 10, tweet_mode: 'extended', result_type: 'popular', lang: 'en' })
 		// console.log(tweets.statuses)
 		return {
-			data: tweets.statuses.map(({ id, created_at, full_text }) => ({ id, created_at, full_text })),
+			data: tweets.statuses.map(({ id, created_at, full_text }) => ({ id, created_at, text: full_text })),
 			count: tweets.statuses.length
 		}
 	} catch (error) {
-		if (typeof error === Array && error.length) {
+		if (Array.isArray(error) && error.length) {
 			return {
 				error: error[0].message
 			}
@@ -29,10 +29,41 @@ const searchTweets = async (query) => {
 	}
 }
 
-const analyzeTweets = async () => {
-	//Todo
+const analyzeTweets = async (input) => {
+	const textAnalClient = new TextAnalyticsClient(process.env.AZURE_ENDPOINT, new AzureKeyCredential(process.env.AZURE_KEY))
+	if (!input.length) {
+		return {
+			error: {
+				message: "An error occured. Please try again later."
+			}
+		}
+	}
+
+	try {
+		const sentimentResult = await textAnalClient.analyzeSentiment(input)
+
+		if (sentimentResult.error === undefined) {
+			const filteredData = sentimentResult.map((s) => ({
+				id: s.id,
+				text: input[s.id],
+				sentiment: s.sentiment,
+				scores: s.confidenceScores
+			}))
+			return filteredData
+		} else {
+			console.error("Encountered an error:", result.error);
+			return {
+				error: result.error
+			}
+		}
+	} catch (error) {
+		return {
+			error: error.message
+		}
+	}
 }
 
 module.exports = {
-	searchTweets
+	searchTweets,
+	analyzeTweets
 }
