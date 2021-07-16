@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { searchTweets, analyzeTweets } = require('../services/twitter')
+// const dummyData = require('../dummy_data.json')
 
 router.get('/', async (req, res) => {
 	const query = req.query.q
@@ -18,7 +19,7 @@ router.get('/', async (req, res) => {
 
 	const sentimentResult = await analyzeTweets(tweetsText)
 
-	res.send(sentimentResult)
+	res.json(sentimentResult)
 })
 
 module.exports = router
